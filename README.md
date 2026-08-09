@@ -24,7 +24,7 @@ InstaClon is a full-stack web application inspired by Instagram, featuring a mod
 ### Backend Setup
 1. Navigate to the backend directory:
    ```bash
-   cd ParcialFinalAvanzada
+   cd backend
    ```
 2. Run the Spring Boot application using the local profile (uses H2 Database):
    ```bash
@@ -51,7 +51,7 @@ InstaClon is a full-stack web application inspired by Instagram, featuring a mod
 
 ### Backend (Railway)
 1. Link your GitHub repository in Railway.
-2. Ensure the Root Directory is set to `/ParcialFinalAvanzada`.
+2. Ensure the Root Directory is set to `/backend`.
 3. Provision a MySQL database and set the environment variables (`PORT`, `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`).
 
 ### Frontend (Vercel)
