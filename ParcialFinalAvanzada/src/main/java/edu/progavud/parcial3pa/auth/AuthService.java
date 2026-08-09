@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Servicio encargado de manejar la lógica relacionada con la autenticación de usuarios.
@@ -24,14 +23,6 @@ public class AuthService {
     
     /** Repositorio para operaciones con usuarios. */
     private final UserRepository userRepository;
-
-     /** Servicio para el envío de correos electrónicos. */
-    @Autowired
-    private EmailService emailService;
-
-    /** Cliente HTTP para consumir servicios externos. */
-    @Autowired
-    private RestTemplate restTemplate;
 
      /**
      * Constructor que inyecta el repositorio de usuarios.
@@ -61,7 +52,6 @@ public class AuthService {
         // TODO: Encriptar contraseña (por ahora guardamos en texto plano)
         // En producción usar BCryptPasswordEncoder
         User savedUser = userRepository.save(user);
-        emailService.enviarConfirmacionCuenta(savedUser.getEmail(), savedUser.getUsername());
         log.info("Usuario registrado exitosamente: {}", savedUser.getUsername());
         
         //restTemplate.getForObject("https://exciting-tranquility-production-14e6.up.railway.app/profile/"+savedUser.getUsername(), Profile.class);

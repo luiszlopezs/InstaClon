@@ -73,6 +73,46 @@ public class PostService {
         postRepo.save(post);
     }
 
+    /**
+     * Crea una nueva publicación guardando la imagen localmente.
+     *
+     * @param userId ID del usuario que crea la publicación
+     * @param image archivo de imagen multipart
+     * @param description descripción de la publicación
+     * @throws IllegalArgumentException si el usuario no existe
+     * @throws IOException si hay error al guardar el archivo
+     */
+    public void crearPost(Long userId, MultipartFile image, String description) throws IOException {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        // Asegurar que el directorio exista
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        // Generar nombre de archivo único
+        String originalFilename = image.getOriginalFilename();
+        String extension = originalFilename != null && originalFilename.contains(".") 
+                ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+                : ".jpg";
+        String uniqueFilename = UUID.randomUUID().toString() + extension;
+
+        // Guardar archivo en disco
+        File serverFile = new File(dir.getAbsolutePath() + File.separator + uniqueFilename);
+        image.transferTo(serverFile);
+
+        // Guardar URL relativa en BD
+        Post post = new Post();
+        post.setUser(user);
+        post.setImageUrl("/images/posts/" + uniqueFilename);
+        post.setDescription(description);
+        post.setCreatedAt(LocalDateTime.now());
+
+        postRepo.save(post);
+    }
+
 
                 /**
      * Obtiene todas las publicaciones ordenadas por fecha de creación descendente,

@@ -10,7 +10,6 @@ import edu.progavud.parcial3pa.home.PostRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,13 +42,8 @@ public class ProfileService {
     private UserRepository userRepository;
     
     @Autowired
-    private RestTemplate restTemplate;
-
-    
-    @Autowired
-    public ProfileService(ProfileRepository profileRepository, RestTemplate restTemplate) {
+    public ProfileService(ProfileRepository profileRepository) {
         this.profileRepository = profileRepository;
-        this.restTemplate = restTemplate;
     }
 
         /**
@@ -84,7 +78,7 @@ public class ProfileService {
             return existente.get();
         }
 
-        User user = restTemplate.getForObject("https://exciting-tranquility-production-14e6.up.railway.app/auth/by-username/" + username, User.class);
+        User user = userRepository.findByUsername(username).orElse(null);
 
         if (user == null || user.getId() == null) {
             throw new RuntimeException("No se pudo obtener el usuario desde auth-service");
@@ -112,8 +106,8 @@ public class ProfileService {
      */
     @Transactional
     public void incrementCounters(String followerUsername, String followedUsername) {
-        Profile follower = profileRepository.findByUsername(followerUsername).orElseThrow();
-        Profile followed = profileRepository.findByUsername(followedUsername).orElseThrow();
+        Profile follower = this.findByUsername(followerUsername);
+        Profile followed = this.findByUsername(followedUsername);
 
         follower.setFollowing(follower.getFollowing() + 1);
         followed.setFollowers(followed.getFollowers() + 1);
@@ -131,8 +125,8 @@ public class ProfileService {
      */
     @Transactional
     public void decrementCounters(String followerUsername, String followedUsername) {
-        Profile follower = profileRepository.findByUsername(followerUsername).orElseThrow();
-        Profile followed = profileRepository.findByUsername(followedUsername).orElseThrow();
+        Profile follower = this.findByUsername(followerUsername);
+        Profile followed = this.findByUsername(followedUsername);
 
         follower.setFollowing(Math.max(0, follower.getFollowing() - 1));
         followed.setFollowers(Math.max(0, followed.getFollowers() - 1));

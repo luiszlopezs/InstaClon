@@ -61,39 +61,51 @@ public class ProfileController {
      * @param profilePictureUrl URL de la nueva imagen de perfil (opcional)
      * @return respuesta con el resultado de la operación y el perfil actualizado si fue exitoso
      */
-    @PostMapping("/update")
-public ResponseEntity<Map<String, Object>> updateProfile(
-        @RequestParam("username") String username,
-        @RequestParam("bio") String bio,
-        @RequestParam(value = "profilePicture", required = false) String profilePictureUrl
-) {
-    Map<String, Object> response = new HashMap<>();
+    @PostMapping(value = "/update", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> updateProfile(
+            @RequestParam("username") String username,
+            @RequestParam("bio") String bio,
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePictureFile
+    ) {
+        Map<String, Object> response = new HashMap<>();
 
-    try {
-        Profile existingProfile = profileService.findByUsername(username);
-        existingProfile.setBio(bio);
+        try {
+            Profile existingProfile = profileService.findByUsername(username);
+            existingProfile.setBio(bio);
 
-        // Asignar link de imagen si se proporcionó
-        if (profilePictureUrl != null && !profilePictureUrl.isBlank()) {
-            existingProfile.setProfilePicture(profilePictureUrl);
+            if (profilePictureFile != null && !profilePictureFile.isEmpty()) {
+                File dir = new File("postsImgs/profile_pictures/");
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+
+                String originalFilename = profilePictureFile.getOriginalFilename();
+                String extension = originalFilename != null && originalFilename.contains(".")
+                        ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                        : ".jpg";
+                String uniqueFilename = UUID.randomUUID().toString() + extension;
+
+                File serverFile = new File(dir.getAbsolutePath() + File.separator + uniqueFilename);
+                profilePictureFile.transferTo(serverFile);
+
+                // This path matches the @GetMapping("/postsImgs/profile_pictures/{filename:.+}")
+                existingProfile.setProfilePicture("/profile/postsImgs/profile_pictures/" + uniqueFilename);
+            }
+
+            existingProfile.getUser().setUsername(username);
+            Profile updated = profileService.updateProfile(existingProfile);
+
+            response.put("success", true);
+            response.put("message", "Perfil actualizado correctamente");
+            response.put("profile", updated);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error al actualizar: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-
-        // También puedes actualizar el username del user si lo permites
-        existingProfile.getUser().setUsername(username);
-
-        Profile updated = profileService.updateProfile(existingProfile);
-
-        response.put("success", true);
-        response.put("message", "Perfil actualizado correctamente");
-        response.put("profile", updated);
-        return ResponseEntity.ok(response);
-
-    } catch (Exception e) {
-        response.put("success", false);
-        response.put("message", "Error al actualizar: " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
-}
 
 
         /**

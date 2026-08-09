@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import org.springframework.web.client.RestTemplate;
+import edu.progavud.parcial3pa.profile.ProfileService;
 
 /**
  * Servicio que contiene la lógica para gestionar las relaciones de seguimiento entre usuarios.
@@ -25,9 +25,9 @@ public class FollowService {
     @Autowired
     private UserRepository userRepository;
 
-        /** Cliente HTTP para realizar solicitudes a otros servicios. */
+        /** Servicio de perfiles para actualizar los contadores locales. */
     @Autowired
-    private RestTemplate restTemplate;
+    private ProfileService profileService;
 
             /**
      * Crea una relación de seguimiento entre dos usuarios si aún no existe.
@@ -49,12 +49,8 @@ public class FollowService {
         if (!followRepository.existsByFollowerAndFollowed(from, to)) {
             followRepository.save(new Follow(from, to));
 
-            // REST Template para actualizar contadores
-            
-            restTemplate.postForObject("https://exciting-tranquility-production-14e6.up.railway.app/profile/increment-follow", Map.of(
-                    "follower", from.getUsername(),
-                    "followed", to.getUsername()
-            ), Void.class);
+            // Llamada local para actualizar contadores
+            profileService.incrementCounters(from.getUsername(), to.getUsername());
         }
         return true;
     }
@@ -69,9 +65,8 @@ public class FollowService {
      */
     @Transactional
     public boolean unfollowUser(String fromUsername, String toUsername) {
-        User from = restTemplate.getForObject("https://exciting-tranquility-production-14e6.up.railway.app/auth/by-username/" + fromUsername, User.class);
-        
-        User to = restTemplate.getForObject("https://exciting-tranquility-production-14e6.up.railway.app/auth/by-username/" + toUsername, User.class);
+        User from = userRepository.findByUsername(fromUsername).orElse(null);
+        User to = userRepository.findByUsername(toUsername).orElse(null);
 
         if (from == null || to == null || from.equals(to)) {
             return false;
@@ -79,10 +74,7 @@ public class FollowService {
 
         followRepository.deleteByFollowerAndFollowed(from, to);
 
-        restTemplate.postForObject("https://exciting-tranquility-production-14e6.up.railway.app/profile/decrement-follow", Map.of(
-                "follower", from.getUsername(),
-                "followed", to.getUsername()
-        ), Void.class);
+        profileService.decrementCounters(from.getUsername(), to.getUsername());
 
         return true;
     }
@@ -96,9 +88,8 @@ public class FollowService {
      * @return true si existe la relación de seguimiento, false en caso contrario
      */
     public boolean isFollowing(String fromUsername, String toUsername) {
-        User from = restTemplate.getForObject("https://exciting-tranquility-production-14e6.up.railway.app/auth/by-username/" + fromUsername, User.class);
-        
-        User to = restTemplate.getForObject("https://exciting-tranquility-production-14e6.up.railway.app/auth/by-username/" + toUsername, User.class);
+        User from = userRepository.findByUsername(fromUsername).orElse(null);
+        User to = userRepository.findByUsername(toUsername).orElse(null);
 
         if (from == null || to == null || from.equals(to)) {
             return false;

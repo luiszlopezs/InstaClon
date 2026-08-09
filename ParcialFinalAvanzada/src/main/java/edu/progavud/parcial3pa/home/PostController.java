@@ -54,6 +54,28 @@ public class PostController {
         }
     }
 
+    /**
+     * Crea una nueva publicación subiendo una imagen localmente.
+     *
+     * @param userId ID del usuario que crea la publicación
+     * @param image archivo Multipart de la imagen
+     * @param description descripción de la publicación
+     */
+    @PostMapping(value = "/upload", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadPost(
+            @RequestParam("userId") Long userId,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "description", defaultValue = "") String description) {
+        try {
+            postService.crearPost(userId, image, description);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Error al guardar la imagen: " + e.getMessage()));
+        }
+    }
+
         /**
      * Obtiene todas las publicaciones, opcionalmente filtradas por usuario.
      *
