@@ -83,7 +83,7 @@ const Profile = () => {
         <div className="profile-info-top">
           <div className="profile-picture">
             {profile.profilePicture && profile.profilePicture !== 'default.jpg' ? (
-               <img src={profile.profilePicture.startsWith('http') ? profile.profilePicture : `${api.defaults.baseURL}/profile/${profile.profilePicture}`} alt="Profile" />
+               <img src={profile.profilePicture.startsWith('http') ? profile.profilePicture : `${api.defaults.baseURL}${profile.profilePicture}`} alt="Profile" />
             ) : (
                <div className="profile-avatar-placeholder">
                  {username?.charAt(0).toUpperCase()}
