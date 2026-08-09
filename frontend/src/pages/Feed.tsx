@@ -30,6 +30,19 @@ const Feed = () => {
   return (
     <div className="feed-container animate-fade-in">
       <div className="feed-posts">
+        <div className="feed-info-banner">
+          <span className="feed-info-icon">💡</span>
+          <div className="feed-info-content">
+            <h4>
+              Aviso sobre Imágenes de Publicaciones
+              <span className="feed-info-badge">En desarrollo</span>
+            </h4>
+            <p>
+              Debido a las limitaciones del hosting gratuito, las imágenes subidas desde archivos locales se conservan temporalmente mientras el servidor esté activo. ¡La integración completa con almacenamiento en la nube (Cloudinary/S3) está en desarrollo y llegará muy pronto! Puedes usar enlaces de imagen (URLs) para publicaciones permanentes.
+            </p>
+          </div>
+        </div>
+
         {posts.length === 0 ? (
           <div className="feed-empty">No posts available. Be the first to post!</div>
         ) : (

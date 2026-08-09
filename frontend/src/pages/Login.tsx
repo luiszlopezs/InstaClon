@@ -36,6 +36,13 @@ const Login = () => {
         <h1 className="auth-title">Welcome Back</h1>
         <p className="auth-subtitle">Log in to InstaClon</p>
         
+        <div className="auth-notice">
+          <span className="auth-notice-icon">⚡</span>
+          <div>
+            <strong>Nota de servidor:</strong> Al usar recursos gratuitos de hosting (Render), la primera petición o inicio de sesión puede tardar unos 30-50 segundos mientras el servidor despierta. ¡Agradecemos tu paciencia!
+          </div>
+        </div>
+
         {error && <div className="auth-error">{error}</div>}
 
         <form onSubmit={handleLogin} className="auth-form">
